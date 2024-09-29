@@ -81,7 +81,7 @@ def processar_mensagem(mensagem):
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         logging.info("Conexão bem-sucedida ao broker MQTT.")
-        client.subscribe("carrinho/leituras")
+        client.subscribe("APB/carrinho/leituras")
     else:
         logging.error(f"Falha na conexão com o broker MQTT. Código de retorno: {rc}")
 

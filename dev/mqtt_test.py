@@ -1,42 +1,50 @@
 import paho.mqtt.client as mqtt
+import time
 import logging
 
-# Função chamada quando o cliente conecta ao broker MQTT
+# Configuração de logs
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+# Função chamada quando o cliente se conecta ao broker
 def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        logging.info("Conexão bem-sucedida ao broker MQTT.")
-        client.subscribe("carrinho/leituras")
-    else:
-        logging.error(f"Falha na conexão com o broker MQTT. Código de retorno: {rc}")
+    logging.info(f"Conectado ao broker com código: {rc}")
+    client.subscribe("APB/carrinho/leituras")  # Assinando o tópico
+
 
 # Função chamada quando uma mensagem é recebida
 def on_message(client, userdata, msg):
-    mensagem = msg.payload.decode()
-    logging.info(f"Mensagem recebida: {mensagem}")
-    print(f"Mensagem MQTT recebida: {mensagem}")
-    processar_mensagem(mensagem)
+    logging.info(f"Mensagem recebida: {msg.payload.decode()}")
 
-# Função para processar a mensagem (ajuste conforme necessário)
-def processar_mensagem(mensagem):
+
+# Função principal
+def main():
+    # Criação do cliente MQTT
+    client = mqtt.Client()
+
+    # Definindo as funções de callback
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    # Conexão ao broker
     try:
-        # Aqui vai a lógica de processamento da mensagem recebida
-        print(f"Processando mensagem: {mensagem}")
+        client.connect("broker.hivemq.com", 1883, 60)  # ou seu servidor MQTT
     except Exception as e:
-        logging.error(f"Erro ao processar a mensagem: {e}")
+        logging.error(f"Falha ao conectar ao broker: {e}")
+        return
 
-# Criação do cliente MQTT com a versão mais recente da API
-client = mqtt.Client(client_id="", clean_session=True, userdata=None, protocol=mqtt.MQTTv311)
+    # Iniciando o loop de escuta de mensagens
+    client.loop_start()  # Inicia a escuta em um thread separado
 
-client.on_connect = on_connect
-client.on_message = on_message
+    try:
+        while True:
+            time.sleep(1)  # Mantém o programa em execução
+    except KeyboardInterrupt:
+        logging.info("Desconectando...")
+    finally:
+        client.loop_stop()  # Para o loop
+        client.disconnect()  # Desconecta do broker
 
-# Conecta ao broker MQTT
-client.connect("broker.hivemq.com", 1883, 60)
 
-# Inicia o loop para receber mensagens
-client.loop_start()
-
-
-
-if __name__ == '__main__':
-    mqtt_client=create_mqtt_client()
+if __name__ == "__main__":
+    main()
