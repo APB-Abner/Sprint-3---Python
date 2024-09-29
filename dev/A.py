@@ -3,7 +3,7 @@ import time
 import logging
 
 # Configurações do log
-logging.basicConfig(filename='carrinho.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='../carrinho.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def conectar_arduino(porta='COM3', baudrate=9600):
     try:

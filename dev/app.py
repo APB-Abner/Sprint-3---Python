@@ -14,7 +14,7 @@ dados_recebidos = {
 }
 
 # Configuração do logging
-logging.basicConfig(filename='carrinho.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(filename='../carrinho.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Função para calcular a velocidade (usando dados de dois sensores)
 def calcular_velocidade(distancia_entre_sensores, tempo_inicio, tempo_fim):
