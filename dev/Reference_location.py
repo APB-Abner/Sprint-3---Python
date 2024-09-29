@@ -55,7 +55,7 @@ def on_message(client, userdata, msg):
     except Exception as e:
         logging.error(f"Erro ao processar mensagem: {e}")
 
-# Configurando o cliente MQTT
+# Configurando o clxiente MQTT
 def setup_mqtt():
     client = mqtt.Client()
     client.on_message = on_message
@@ -64,7 +64,7 @@ def setup_mqtt():
     except Exception as e:
         logging.error(f"Não foi possível conectar ao broker MQTT: {e}")
         return None
-    client.subscribe("carrinho/sensores")
+    client.subscribe("APB/carrinho/leituras")
     client.loop_start()
     return client
 

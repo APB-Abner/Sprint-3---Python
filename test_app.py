@@ -2,7 +2,7 @@ import unittest
 import paho.mqtt.client as mqtt
 from unittest.mock import MagicMock, patch
 import logging
-from dev.app import processar_mensagem, create_mqtt_client, on_connect, on_message
+from app import processar_mensagem, create_mqtt_client, on_connect, on_message
 
 class TestMQTTClient(unittest.TestCase):
 
@@ -45,7 +45,7 @@ class TestMQTTClient(unittest.TestCase):
 class FlaskAppTest(unittest.TestCase):
 
     def create_app(self):
-        from dev.app import app  # Importando o app aqui para referência
+        from app import app  # Importando o app aqui para referência
         app.config['TESTING'] = True
         return app
 

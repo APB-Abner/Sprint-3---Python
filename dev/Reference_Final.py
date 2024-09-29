@@ -1,3 +1,15 @@
+# ///------------------------------------------------|||------------------------------------------------//
+# ///------------------------------------------------|||------------------------------------------------//
+# ///------------------------------------------------|||------------------------------------------------//
+# ///------------------------------------------------|||------------------------------------------------//
+'/-------------------------NÃO EDITAR, JÁ LIGA MQTT E FLASK PARA RECEBER AQUIVOS-------------------------/'
+# ///------------------------------------------------|||------------------------------------------------//
+# ///------------------------------------------------|||------------------------------------------------//
+# ///------------------------------------------------|||------------------------------------------------//
+# ///------------------------------------------------|||------------------------------------------------//
+# ///------------------------------------------------|||------------------------------------------------//
+
+
 import time
 import paho.mqtt.client as mqtt
 import logging
@@ -101,25 +113,10 @@ def index():
 def dados():
     return jsonify(dados_recebidos)
 
-# Função de testes automatizados
-def testar_funcoes():
-    # Teste para cálculo de velocidade
-    assert calcular_velocidade(2, 1, 3) == 1, "Erro no cálculo de velocidade!"
-    assert calcular_velocidade(0, 1, 2) == 0, "Erro no cálculo de velocidade!"
 
-    # Teste de mensagem processada corretamente
-    try:
-        processar_mensagem("Distancia: 135.50 cm, Linha: 0")
-        logging.info("Teste de processamento de mensagem bem-sucedido.")
-    except:
-        logging.error("Falha no teste de processamento de mensagem.")
 
 if __name__ == "__main__":
     # Iniciar o cliente MQTT
     iniciar_mqtt()
-
-    # Executar cenários de teste automatizado
-    testar_funcoes()
-
     # Iniciar o servidor Flask
     app.run(debug=True)
