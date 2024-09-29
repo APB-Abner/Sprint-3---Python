@@ -4,25 +4,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dados do Carrinho Segue Linha</title>
-    <script>
-        async function atualizarDados() {
-            const resposta = await fetch('/dados');
-            const dados = await resposta.json();
-            document.getElementById('distancia').textContent = `Distância: ${dados.distancia} cm`;
-            document.getElementById('linha').textContent = `Linha: ${dados.linha}`;
-            document.getElementById('velocidade').textContent = `Velocidade: ${dados.velocidade.toFixed(2)} m/s`;
+    <title>Dashboard do Carrinho</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            padding: 20px;
         }
 
-        setInterval(atualizarDados, 1000); // Atualiza os dados a cada 1 segundo
-    </script>
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 40vh;
+            width: 80vw;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Dados do Carrinho Segue Linha</h1>
-    <p id="distancia">Distância: -- cm</p>
-    <p id="linha">Linha: --</p>
-    <p id="velocidade">Velocidade: -- m/s</p>
+    <div class="container">
+        <h1 class="text-center mb-4">Dashboard do Carrinho</h1>
+
+        <!-- Cards com informações -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-header">Distância</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Distância atual:</h5>
+                        <p class="card-text"><span id="distancia">0.0</span> cm</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-header">Linha</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Linha atual:</h5>
+                        <p class="card-text"><span id="linha">0</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-header">Velocidade</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Velocidade atual:</h5>
+                        <p class="card-text"><span id="velocidade">0.0</span> m/s</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        Gráfico de Velocidade ao longo do tempo
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="graficoVelocidade"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <script type="text/javascript">
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Elementos HTML onde os dados serão exibidos
+        var distanciaElement = document.getElementById('distancia');
+        var linhaElement = document.getElementById('linha');
+        var velocidadeElement = document.getElementById('velocidade');
+
+        // Dados para o gráfico
+        var velocidadeChartData = {
+            labels: [],
+            datasets: [{
+                label: 'Velocidade (m/s)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                data: []
+            }]
+        };
+
+        // Configuração do gráfico
+        var ctx = document.getElementById('graficoVelocidade').getContext('2d');
+        var graficoVelocidade = new Chart(ctx, {
+            type: 'line',
+            data: velocidadeChartData,
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Tempo'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Velocidade (m/s)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Função para adicionar dados ao gráfico
+        function adicionarDadosAoGrafico(tempo, velocidade) {
+            velocidadeChartData.labels.push(tempo);
+            velocidadeChartData.datasets[0].data.push(velocidade);
+            graficoVelocidade.update();
+        }
+
+        // Escutando os dados recebidos pelo Socket.IO
+        socket.on('atualizacao_dados', function (dados) {
+            distanciaElement.innerText = dados.distancia;
+            linhaElement.innerText = dados.linha;
+            velocidadeElement.innerText = dados.velocidade;
+
+            // Adiciona novos dados ao gráfico
+            var agora = new Date().toLocaleTimeString();
+            adicionarDadosAoGrafico(agora, dados.velocidade);
+        });
+    </script>
+
 </body>
 
 </html>

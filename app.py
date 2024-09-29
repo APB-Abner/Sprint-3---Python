@@ -68,7 +68,7 @@ def create_mqtt_client():
     client.on_connect = on_connect
     client.on_message = on_message
     try:
-        client.connect("broker.hivemq.com", 1883, 60)  # Substitua pelo IP do seu broker
+        client.connect("broker.hivemq.com", 1883, 60)
     except Exception as e:
         logging.error(f"Não foi possível conectar ao broker MQTT: {e}")
         return None
