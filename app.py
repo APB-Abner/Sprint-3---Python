@@ -3,7 +3,6 @@ from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
 import logging
 
-
 # Configurando o logger para capturar logs
 logging.basicConfig(level=logging.INFO)
 
@@ -22,52 +21,58 @@ dados_recebidos = {
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         logging.info("Conexão bem-sucedida ao broker MQTT.")
-        client.subscribe("APB/carrinho/leituras")
+        # Assina os tópicos que você quer ouvir
+        client.subscribe("APB/carrinho/leituras/distancia")
+        client.subscribe("APB/carrinho/leituras/linha")
+        client.subscribe("APB/carrinho/leituras/velocidade")
     else:
         logging.error(f"Falha na conexão com o broker MQTT. Código de retorno: {rc}")
 
 # Função chamada quando uma mensagem é recebida
 def on_message(client, userdata, msg):
     mensagem = msg.payload.decode()
-    logging.info(f"Mensagem recebida: {mensagem}")
-    processar_mensagem(mensagem)
+    logging.info(f"Mensagem recebida no tópico {msg.topic}: {mensagem}")
+    processar_mensagem(msg.topic, mensagem)
 
-# Função para processar a mensagem (ajuste conforme necessário)
-def processar_mensagem(mensagem):
-    msg = mensagem
-    topic = msg.topic()
+# Função para processar a mensagem e atualizar as variáveis globais
+def processar_mensagem(topic, mensagem):
+    global dados_recebidos
     try:
         if not mensagem:
             raise ValueError("Mensagem inválida ou None")
-        # Simulação do processamento
+        
         logging.info(f"Processando mensagem: {mensagem}")
-        if topic == "*/distancia":
-            distancia = float(mensagem)
-            logging.info(f"Distância recebida: {distancia} cm")
-        elif topic == "*/linha":
-            linha = int(mensagem)
-            logging.info(f"Linha recebida: {linha}")
-        elif topic == "*/velocidade":
-            velocidade = float(mensagem)
-            logging.info(f"Velocidade recebida: {velocidade} m/s")
+
+        # Atualiza as variáveis globais com base no tópico recebido
+        if topic == "APB/carrinho/leituras/distancia":
+            dados_recebidos['distancia'] = float(mensagem)
+            logging.info(f"Distância atualizada: {dados_recebidos['distancia']} cm")
+        elif topic == "APB/carrinho/leituras/linha":
+            dados_recebidos['linha'] = int(mensagem)
+            logging.info(f"Linha atualizada: {dados_recebidos['linha']}")
+        elif topic == "APB/carrinho/leituras/velocidade":
+            dados_recebidos['velocidade'] = float(mensagem)
+            logging.info(f"Velocidade atualizada: {dados_recebidos['velocidade']} m/s")
+
+        # Emite um evento para o front-end com os dados atualizados
+        socketio.emit('atualizacao_dados', dados_recebidos)
         return True
+
     except Exception as e:
         logging.error(f"Erro ao processar a mensagem: {e}")
         return False
 
-
 # Criação do cliente MQTT
 def create_mqtt_client():
     client = mqtt.Client()
-    logging.info(f"Resultado do client: {client}")
+    client.on_connect = on_connect
     client.on_message = on_message
     try:
         client.connect("broker.hivemq.com", 1883, 60)  # Substitua pelo IP do seu broker
     except Exception as e:
         logging.error(f"Não foi possível conectar ao broker MQTT: {e}")
         return None
-    client.subscribe("APB/carrinho/leituras")
-    client.loop_start()
+    client.loop_start()  # Inicia o loop em um thread separado
     return client
 
 @app.route('/')
@@ -80,6 +85,6 @@ def dados():
     return jsonify(dados_recebidos)
 
 if __name__ == '__main__':
-    mqtt_client=create_mqtt_client()
+    mqtt_client = create_mqtt_client()
     if mqtt_client:
         socketio.run(app, debug=True)
