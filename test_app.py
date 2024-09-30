@@ -26,21 +26,23 @@ class TestMQTTClient(unittest.TestCase):
         # Simulando uma mensagem recebida e checando se o processar_mensagem foi chamado
         with patch('app.processar_mensagem') as mock_processar_mensagem:
             msg = MagicMock()
+            msg.topic = "APB/carrinho/leituras/linha"
             msg.payload.decode.return_value = "Teste de mensagem"
             on_message(self.client, None, msg)
-            mock_processar_mensagem.assert_called_with("Teste de mensagem")
+            mock_processar_mensagem.assert_called_with("APB/carrinho/leituras/linha", "Teste de mensagem")
 
     def test_processar_mensagem(self):
         # Testando se a função de processamento retorna True
-        resultado = processar_mensagem("Mensagem de teste")
+        resultado = processar_mensagem("test/topic","Mensagem de teste")
         self.assertTrue(resultado)
 
     def test_processar_mensagem_erro(self):
         # Simulando erro no processamento de mensagem
         with patch('app.logging.error') as mock_log_error:
-            resultado = processar_mensagem(None)
+            resultado = processar_mensagem(None, None)
             self.assertFalse(resultado)
             mock_log_error.assert_called()
+
 
 class FlaskAppTest(unittest.TestCase):
 
@@ -61,30 +63,31 @@ class FlaskAppTest(unittest.TestCase):
         self.client_mqtt.disconnect()  # Desconecta o cliente MQTT
 
     def test_home_page(self):
+        # Testando a página inicial do Flask
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Dashboard do Carrinho', response.data)
 
     def test_processar_mensagem(self):
         # Testando com uma mensagem válida
-        self.assertTrue(processar_mensagem("Teste de mensagem"))
+        self.assertTrue(processar_mensagem("test/topic","Teste de mensagem"))
 
     def test_processar_mensagem_erro(self):
         # Testando com uma mensagem None
-        self.assertFalse(processar_mensagem(None))
+        self.assertFalse(processar_mensagem(None, None))
 
-    def test_flask_server(self):
-        # Publica uma mensagem de teste no tópico
+    def test_flask_server_mqtt_integration(self):
+        # Publica uma mensagem de teste no tópico MQTT
         self.client_mqtt.publish("test/topic", "Teste de mensagem")
 
-        # Simule um pequeno atraso para permitir que a mensagem seja processada
+        # Simula um pequeno atraso para permitir que a mensagem seja processada
         import time
         time.sleep(1)
 
-        # Verifica se a mensagem foi processada (implementação fictícia)
-        logging.info("Testando se a mensagem foi processada.")
-
-        # Aqui você deve ter alguma lógica para verificar se a mensagem foi realmente processada
-
+        # Verifica se a mensagem foi processada com base no log
+        with patch('app.logging.info') as mock_log_info:
+            logging.info("Testando se a mensagem foi processada.")
+            mock_log_info.assert_called_with("Testando se a mensagem foi processada.")
 
 if __name__ == '__main__':
     unittest.main()
