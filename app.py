@@ -20,7 +20,7 @@ dados_recebidos = {
 # Função chamada quando o cliente conecta ao broker MQTT
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        logging.info("Conexão bem-sucedida ao broker MQTT.")
+        logging.info(f"Conexão bem-sucedida ao broker MQTT: {rc}")
         # Assina os tópicos que você quer ouvir
         client.subscribe("APB/carrinho/leituras/distancia")
         client.subscribe("APB/carrinho/leituras/linha")
@@ -84,7 +84,21 @@ def index():
 def dados():
     return jsonify(dados_recebidos)
 
+
+@app.teardown_appcontext
+def teardown_mqtt_client(exception):
+    global mqtt_client
+    if mqtt_client:
+        logging.info("Desconectando do broker MQTT...")
+        mqtt_client.loop_stop()  # Para o loop
+        mqtt_client.disconnect()  # Desconecta do broker
+        logging.info("Desconectado com sucesso.")
+
+
 if __name__ == '__main__':
     mqtt_client = create_mqtt_client()
     if mqtt_client:
-        socketio.run(app, debug=True)
+        try:
+            socketio.run(app, debug=True)
+        except KeyboardInterrupt:
+            logging.info("Servidor interrompido manualmente.")
