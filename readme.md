@@ -55,8 +55,8 @@ O código inclui uma finalização apropriada, que garante que o cliente MQTT se
 ### 2. **Clonar o Repositório**
 
 ```bash
-git clone https://github.com/SeuUsuario/nome-do-repositorio.git
-cd nome-do-repositorio
+git clone https://github.com/APB-Abner/Sprint-3---Python.git
+cd Sprint-3---Python
 ```
 
 ### 3. **Executar o Servidor**
@@ -68,13 +68,6 @@ python app.py
 ```
 
 O servidor será iniciado e os dados dos carrinhos começarão a ser exibidos na interface.
-
-## Público-Alvo
-
-Este projeto foi idealizado para:
-
-- **Jovens e Estudantes**: Incentivar o interesse em **tecnologia**, **automobilismo** e **sustentabilidade**.
-- **Pessoas com Deficiência Sensorial**: Proporcionar uma experiência de automobilismo mais inclusiva, com foco em **baixa emissão de ruído**, ideal para pessoas no **espectro autista**.
 
 ## Autores
 
