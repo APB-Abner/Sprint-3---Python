@@ -17,6 +17,9 @@ dados_recebidos = {
     'velocidade': 0.0
 }
 
+# Variável global para o cliente MQTT
+mqtt_client = None  # Adicione esta linha
+
 # Função chamada quando o cliente conecta ao broker MQTT
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
