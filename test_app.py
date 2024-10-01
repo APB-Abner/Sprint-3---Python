@@ -14,7 +14,7 @@ class TestMQTTClient(unittest.TestCase):
         # Testando conexão bem-sucedida (rc = 0)
         with patch('app.logging.info') as mock_log_info:
             on_connect(self.client, None, None, 0)
-            mock_log_info.assert_called_with("Conexão bem-sucedida ao broker MQTT.")
+            mock_log_info.assert_called_with("Conexão bem-sucedida ao broker MQTT: 0")
 
     def test_on_connect_failure(self):
         # Testando falha de conexão (rc != 0)
